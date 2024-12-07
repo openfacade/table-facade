@@ -18,7 +18,7 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
       - name: unit tests
-        run: mvn -B clean install -DskipTests -Dspotbugs.skip=true; mvn -B test -pl http-facade-tests; mvn validate
+        run: mvn -B clean test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         env:
