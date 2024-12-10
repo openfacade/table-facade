@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.spring.test.common;
+package io.github.openfacade.table.spring.reactive.mysql;
 
-public class TestEntity {
+public class TestMysqlEntity {
 }

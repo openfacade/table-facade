@@ -33,8 +33,8 @@
         <module>table-facade-spring-reactive-mongo</module>
         <module>table-facade-spring-reactive-mysql</module>
         <module>table-facade-spring-reactive-tests</module>
-        <module>table-facade-spring-tests</module>
         <module>table-facade-spring-test-common</module>
+        <module>table-facade-spring-tests</module>
     </modules>
 
     <artifactId>table-facade-springboot-parent</artifactId>
@@ -45,6 +45,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.testSource>17</maven.compiler.testSource>
         <maven.compiler.testTarget>17</maven.compiler.testTarget>
+        <junit.version>5.9.3</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -64,6 +65,17 @@
             <groupId>io.github.openfacade</groupId>
             <artifactId>table-facade-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfacade</groupId>
+            <artifactId>table-facade-test-common</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
