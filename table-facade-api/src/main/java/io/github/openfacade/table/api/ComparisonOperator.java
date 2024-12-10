@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.reactive.api;
+package io.github.openfacade.table.api;
 
-import io.github.openfacade.table.api.Condition;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+public enum ComparisonOperator {
+    EQ("="),
+    NEQ("<>"),
+    GT(">"),
+    LT("<"),
+    GTE(">="),
+    LTE("<=");
 
-public interface ReactiveTableOperations {
-    <T> Mono<T> insert(T object);
+    private final String symbol;
 
-    <T> Mono<Long> update(Condition condition, Object[] pairs, Class<T> type);
+    ComparisonOperator(String symbol) {
+        this.symbol = symbol;
+    }
 
-    <T> Mono<T> find(Condition condition, Class<T> type);
-
-    <T> Flux<T> findAll(Class<T> type);
-
-    <T> Mono<Long> delete(Condition condition, Class<T> type);
-
-    <T> Mono<Long> deleteAll(Class<T> type);
+    public String symbol() {
+        return symbol;
+    }
 }

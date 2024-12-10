@@ -16,6 +16,8 @@
 
 package io.github.openfacade.table.spring.reactive.mysql;
 
+import io.github.openfacade.table.api.ComparisonCondition;
+import io.github.openfacade.table.api.ComparisonOperator;
 import io.github.openfacade.table.reactive.api.ReactiveTableOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -27,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.core.publisher.Flux;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -59,7 +62,7 @@ public class ReactiveMysqlTableOperationsTest {
     void testInsertSuccess() {
         TestMysqlEntity entityToInsert = new TestMysqlEntity();
         entityToInsert.setId(2L);
-        entityToInsert.setBlobBytesField("Sample Data".getBytes());
+        entityToInsert.setBlobBytesField("Sample Data".getBytes(StandardCharsets.UTF_8));
 
         reactiveTableOperations.insert(entityToInsert)
                 .doOnSuccess(insertedEntity -> log.info("Inserted entity: {}", insertedEntity))
@@ -77,9 +80,43 @@ public class ReactiveMysqlTableOperationsTest {
 
         TestMysqlEntity retrievedEntity = entities.get(0);
         Assertions.assertNotNull(retrievedEntity.getId(), "ID should not be null after insertion");
-        Assertions.assertArrayEquals("Sample Data".getBytes(), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertArrayEquals("Sample Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
 
         reactiveTableOperations.deleteAll(TestMysqlEntity.class)
+                .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
+                .block();
+
+        List<TestMysqlEntity> emptyResult = reactiveTableOperations.findAll(TestMysqlEntity.class)
+                .collectList()
+                .block();
+
+        Assertions.assertTrue(emptyResult.isEmpty(), "The table should be empty after deletion");
+    }
+
+    @Test
+    void testFindByComparisonCondition() {
+        TestMysqlEntity entityToInsert = new TestMysqlEntity();
+        entityToInsert.setId(2L);
+        entityToInsert.setBlobBytesField("Sample Data".getBytes(StandardCharsets.UTF_8));
+
+        reactiveTableOperations.insert(entityToInsert)
+                .doOnSuccess(insertedEntity -> log.info("Inserted entity: {}", insertedEntity))
+                .block();
+
+        ComparisonCondition condition = new ComparisonCondition("id", ComparisonOperator.EQ, 2L);
+        TestMysqlEntity retrievedEntity = reactiveTableOperations.find(condition, TestMysqlEntity.class).block();
+
+        Assertions.assertNotNull(retrievedEntity, "Retrieved entity should not be null");
+        Assertions.assertEquals(2L, retrievedEntity.getId(), "Retrieved entity ID should match");
+
+        reactiveTableOperations.update(condition, new Object[]{"blob_bytes_field", "Updated Data".getBytes(StandardCharsets.UTF_8)}, TestMysqlEntity.class)
+                .doOnSuccess(updatedCount -> log.info("Updated {} entities", updatedCount))
+                .block();
+
+        TestMysqlEntity updatedEntity = reactiveTableOperations.find(condition, TestMysqlEntity.class).block();
+        Assertions.assertArrayEquals("Updated Data".getBytes(StandardCharsets.UTF_8), updatedEntity.getBlobBytesField(), "Blob data should match after update");
+
+        reactiveTableOperations.delete(condition, TestMysqlEntity.class)
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
                 .block();
 

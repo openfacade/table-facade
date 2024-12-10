@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.reactive.api;
+package io.github.openfacade.table.api;
 
-import io.github.openfacade.table.api.Condition;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import lombok.Getter;
 
-public interface ReactiveTableOperations {
-    <T> Mono<T> insert(T object);
+@Getter
+public class ComparisonCondition implements Condition {
+    private final String column;
 
-    <T> Mono<Long> update(Condition condition, Object[] pairs, Class<T> type);
+    private final ComparisonOperator operator;
 
-    <T> Mono<T> find(Condition condition, Class<T> type);
+    private final Object value;
 
-    <T> Flux<T> findAll(Class<T> type);
-
-    <T> Mono<Long> delete(Condition condition, Class<T> type);
-
-    <T> Mono<Long> deleteAll(Class<T> type);
+    public ComparisonCondition(String column, ComparisonOperator operator, Object value) {
+        this.column = column;
+        this.operator = operator;
+        this.value = value;
+    }
 }

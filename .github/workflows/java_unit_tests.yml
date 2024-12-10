@@ -32,7 +32,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: unit tests
-        run: mvn -B clean test
+        run: mvn -B clean test; mvn validate
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         env:

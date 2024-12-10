@@ -14,22 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.reactive.api;
+package io.github.openfacade.table.api;
 
-import io.github.openfacade.table.api.Condition;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-public interface ReactiveTableOperations {
-    <T> Mono<T> insert(T object);
-
-    <T> Mono<Long> update(Condition condition, Object[] pairs, Class<T> type);
-
-    <T> Mono<T> find(Condition condition, Class<T> type);
-
-    <T> Flux<T> findAll(Class<T> type);
-
-    <T> Mono<Long> delete(Condition condition, Class<T> type);
-
-    <T> Mono<Long> deleteAll(Class<T> type);
+public interface Condition {
 }

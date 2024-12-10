@@ -16,6 +16,7 @@
 
 package io.github.openfacade.table.spring.reactive.mongo;
 
+import io.github.openfacade.table.api.Condition;
 import io.github.openfacade.table.spring.core.ReactiveBaseTableOperations;
 import io.github.openfacade.table.spring.core.TableMetadata;
 import reactor.core.publisher.Flux;
@@ -28,7 +29,22 @@ public class ReactiveMongoTableOperations extends ReactiveBaseTableOperations {
     }
 
     @Override
+    public <T> Mono<Long> update(Condition condition, Object[] pairs, Class<T> type, TableMetadata metadata) {
+        return null;
+    }
+
+    @Override
+    public <T> Mono<T> find(Condition condition, Class<T> type, TableMetadata metadata) {
+        return null;
+    }
+
+    @Override
     public <T> Flux<T> findAll(Class<T> type, TableMetadata metadata) {
+        return null;
+    }
+
+    @Override
+    public <T> Mono<Long> delete(Condition condition, Class<T> type, TableMetadata metadata) {
         return null;
     }
 

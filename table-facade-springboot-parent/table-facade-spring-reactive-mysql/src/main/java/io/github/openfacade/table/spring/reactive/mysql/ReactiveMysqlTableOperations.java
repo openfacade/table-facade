@@ -16,11 +16,14 @@
 
 package io.github.openfacade.table.spring.reactive.mysql;
 
+import io.github.openfacade.table.api.ComparisonCondition;
+import io.github.openfacade.table.api.Condition;
 import io.github.openfacade.table.spring.core.ReactiveBaseTableOperations;
 import io.github.openfacade.table.spring.core.TableMetadata;
 import io.r2dbc.spi.Row;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -74,6 +77,48 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
     }
 
     @Override
+    public <T> Mono<Long> update(Condition condition, Object[] pairs, Class<T> type, TableMetadata metadata) {
+        String tableName = escapeIdentifier(metadata.getTableName());
+        if (pairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Pairs must be an even number.");
+        }
+
+        StringBuilder setClauseBuilder = new StringBuilder();
+        for (int i = 0; i < pairs.length; i += 2) {
+            if (i > 0) {
+                setClauseBuilder.append(", ");
+            }
+
+            String column = (String) pairs[i];
+
+            setClauseBuilder.append(escapeIdentifier(column)).append(" = ").append(" ?");
+        }
+
+        String query = "UPDATE " + tableName + " SET " + setClauseBuilder + " WHERE " + condition(condition);
+
+        DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(query);
+        for (int i = 1; i < pairs.length; i += 2) {
+            spec = spec.bind(i / 2, pairs[i]);
+        }
+
+        return spec.fetch().rowsUpdated().map(Long::valueOf);
+    }
+
+    @Override
+    public <T> Mono<T> find(Condition condition, Class<T> type, TableMetadata metadata) {
+        String tableName = escapeIdentifier(metadata.getTableName());
+        List<String> escapedColumns = metadata.getSetterMap().keySet().stream()
+                .map(this::escapeIdentifier)
+                .collect(Collectors.toList());
+
+        String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName + " WHERE " + condition(condition);
+
+        return databaseClient.sql(query)
+                .map((row, metadataAccessor) -> mapRowToEntity(row, type, metadata))
+                .one();
+    }
+
+    @Override
     public <T> Flux<T> findAll(Class<T> type, TableMetadata metadata) {
         String tableName = escapeIdentifier(metadata.getTableName());
         List<String> escapedColumns = metadata.getSetterMap().keySet().stream()
@@ -106,6 +151,17 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
     }
 
     @Override
+    public <T> Mono<Long> delete(Condition condition, Class<T> type, TableMetadata metadata) {
+        String tableName = escapeIdentifier(metadata.getTableName());
+        String query = "DELETE FROM " + tableName + " WHERE " + condition(condition);
+
+        return databaseClient.sql(query)
+                .fetch()
+                .rowsUpdated()
+                .map(Long::valueOf);
+    }
+
+    @Override
     public <T> Mono<Long> deleteAll(Class<T> type, TableMetadata metadata) {
         String tableName = escapeIdentifier(metadata.getTableName());
         String query = "DELETE FROM " + tableName;
@@ -116,7 +172,35 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
                 .map(Long::valueOf);
     }
 
+    private String condition(Condition condition) {
+        if (condition instanceof ComparisonCondition comparisonCondition) {
+            return escapeIdentifier(comparisonCondition.getColumn()) + " " + comparisonCondition.getOperator().symbol() + " " + escapeValue(comparisonCondition.getValue());
+        } else {
+            throw new IllegalArgumentException("Unsupported condition type: " + condition.getClass().getName());
+        }
+    }
+
     private String escapeIdentifier(@NotNull String identifier) {
         return "`" + identifier + "`";
+    }
+
+    private String escapeValue(@Nullable Object value) {
+        if (value == null) {
+            return "NULL";
+        }
+
+        if (value instanceof String) {
+            return "'" + ((String) value).replace("\\", "\\\\").replace("'", "\\'") + "'";
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? "1" : "0";
+        }
+
+        if (value instanceof Number) {
+            return value.toString();
+        }
+
+        return "'" + value.toString().replace("\\", "\\\\").replace("'", "\\'") + "'";
     }
 }

@@ -32,9 +32,7 @@
         <module>table-facade-spring-postgre</module>
         <module>table-facade-spring-reactive-mongo</module>
         <module>table-facade-spring-reactive-mysql</module>
-        <module>table-facade-spring-reactive-tests</module>
         <module>table-facade-spring-test-common</module>
-        <module>table-facade-spring-tests</module>
     </modules>
 
     <artifactId>table-facade-springboot-parent</artifactId>
