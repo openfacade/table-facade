@@ -20,34 +20,22 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.openfacade</groupId>
-        <artifactId>table-facade-spring-parent</artifactId>
+        <artifactId>table-facade-springboot-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>table-facade-spring-tests</artifactId>
+    <artifactId>table-facade-spring-reactive-tests</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>io.github.openfacade</groupId>
-            <artifactId>table-facade-spring-mongo</artifactId>
+            <artifactId>table-facade-spring-reactive-mongo</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.openfacade</groupId>
-            <artifactId>table-facade-spring-mysql</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.openfacade</groupId>
-            <artifactId>table-facade-spring-opengauss</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.openfacade</groupId>
-            <artifactId>table-facade-spring-postgre</artifactId>
+            <artifactId>table-facade-spring-reactive-mysql</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

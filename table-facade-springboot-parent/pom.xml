@@ -34,10 +34,18 @@
         <module>table-facade-spring-reactive-mysql</module>
         <module>table-facade-spring-reactive-tests</module>
         <module>table-facade-spring-tests</module>
+        <module>table-facade-spring-test-common</module>
     </modules>
 
-    <artifactId>table-facade-spring-parent</artifactId>
+    <artifactId>table-facade-springboot-parent</artifactId>
     <packaging>pom</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.testSource>17</maven.compiler.testSource>
+        <maven.compiler.testTarget>17</maven.compiler.testTarget>
+    </properties>
 
     <dependencyManagement>
         <dependencies>

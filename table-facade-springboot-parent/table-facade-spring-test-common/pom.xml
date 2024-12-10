@@ -20,17 +20,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.openfacade</groupId>
-        <artifactId>table-facade-spring-parent</artifactId>
+        <artifactId>table-facade-springboot-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>table-facade-spring-mysql</artifactId>
+    <artifactId>table-facade-spring-test-common</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>${mysql.version}</version>
+            <groupId>io.github.openfacade</groupId>
+            <artifactId>table-facade-test-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -20,18 +20,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.openfacade</groupId>
-        <artifactId>table-facade-spring-parent</artifactId>
+        <artifactId>table-facade-springboot-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>table-facade-spring-reactive-mysql</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>io.github.openfacade</groupId>
-            <artifactId>table-facade-reactive-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+    <artifactId>table-facade-spring-postgre</artifactId>
 
 </project>
