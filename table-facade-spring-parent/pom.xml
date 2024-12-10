@@ -10,6 +10,7 @@
     </parent>
 
     <modules>
+        <module>table-facade-spring</module>
         <module>table-facade-spring-mongo</module>
         <module>table-facade-spring-mysql</module>
         <module>table-facade-spring-opengauss</module>
