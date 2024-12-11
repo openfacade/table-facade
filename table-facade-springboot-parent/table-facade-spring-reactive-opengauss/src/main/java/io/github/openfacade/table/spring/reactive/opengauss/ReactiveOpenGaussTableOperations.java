@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.spring.reactive.mysql;
+package io.github.openfacade.table.spring.reactive.opengauss;
 
 import io.github.openfacade.table.api.ComparisonCondition;
 import io.github.openfacade.table.api.Condition;
@@ -30,7 +30,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +41,7 @@ import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
-public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
+public class ReactiveOpenGaussTableOperations extends ReactiveBaseTableOperations {
     private final DatabaseClient databaseClient;
 
     public <T> Mono<T> insertOnDuplicateKeyUpdate(T object, Object[] pairs) {
@@ -200,6 +202,18 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
             try {
                 setter.invoke(instance, row.get(columnName, parameterType));
             } catch (Exception e) {
+                // fall back, opengauss map mysql blob to driver string, but it can't map string to bytes
+                Object object = row.get(columnName, Object.class);
+                if ((object instanceof String str) && parameterType == byte[].class) {
+                    try {
+                        setter.invoke(instance, str.getBytes(StandardCharsets.UTF_8));
+                    } catch (IllegalAccessException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (InvocationTargetException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    continue;
+                }
                 throw new RuntimeException(
                         "Error setting field '" + columnName + "' for entity: " + type.getName(), e
                 );

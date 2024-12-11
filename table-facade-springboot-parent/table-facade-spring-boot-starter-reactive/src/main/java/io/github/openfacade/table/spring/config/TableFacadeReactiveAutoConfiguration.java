@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.spring.core;
+package io.github.openfacade.table.spring.config;
 
-import io.github.openfacade.table.api.DriverType;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import io.github.openfacade.table.spring.core.TableFacadeProperties;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@Setter
-@Getter
-@ConfigurationProperties("spring.table.facade")
-public class FacadeProperties {
-    private DriverType driverType;
+@AutoConfiguration
+@EnableConfigurationProperties(TableFacadeProperties.class)
+public class TableFacadeReactiveAutoConfiguration {
 }

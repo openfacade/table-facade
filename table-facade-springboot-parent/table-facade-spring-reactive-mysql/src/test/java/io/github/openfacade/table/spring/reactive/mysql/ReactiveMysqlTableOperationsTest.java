@@ -94,6 +94,41 @@ public class ReactiveMysqlTableOperationsTest {
     }
 
     @Test
+    void testInsertNoIdSuccess() {
+        TestMysqlEntity entityToInsert = new TestMysqlEntity();
+        entityToInsert.setBlobBytesField("Sample Data".getBytes(StandardCharsets.UTF_8));
+
+        reactiveTableOperations.insert(entityToInsert)
+                .doOnSuccess(insertedEntity -> log.info("Inserted entity: {}", insertedEntity))
+                .block();
+
+        Flux<TestMysqlEntity> findAllResult = reactiveTableOperations.findAll(TestMysqlEntity.class);
+
+        List<TestMysqlEntity> entities = findAllResult
+                .doOnNext(entity -> log.info("Retrieved entity: {}", entity))
+                .collectList()
+                .block();
+
+        Assertions.assertNotNull(entities, "Retrieved entities should not be null");
+        Assertions.assertFalse(entities.isEmpty(), "Retrieved entities should not be empty");
+
+        TestMysqlEntity retrievedEntity = entities.get(0);
+        Assertions.assertNotNull(retrievedEntity.getId(), "ID should not be null after insertion");
+        Assertions.assertArrayEquals("Sample Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+
+        reactiveTableOperations.deleteAll(TestMysqlEntity.class)
+                .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
+                .block();
+
+        List<TestMysqlEntity> emptyResult = reactiveTableOperations.findAll(TestMysqlEntity.class)
+                .collectList()
+                .block();
+
+        Assertions.assertTrue(emptyResult.isEmpty(), "The table should be empty after deletion");
+    }
+
+
+    @Test
     void testFindByComparisonCondition() {
         TestMysqlEntity entityToInsert = new TestMysqlEntity();
         entityToInsert.setId(2L);

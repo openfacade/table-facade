@@ -26,12 +26,14 @@
 
     <modules>
         <module>table-facade-spring</module>
+        <module>table-facade-spring-boot-starter-reactive</module>
         <module>table-facade-spring-mongo</module>
         <module>table-facade-spring-mysql</module>
         <module>table-facade-spring-opengauss</module>
         <module>table-facade-spring-postgre</module>
         <module>table-facade-spring-reactive-mongo</module>
         <module>table-facade-spring-reactive-mysql</module>
+        <module>table-facade-spring-reactive-opengauss</module>
         <module>table-facade-spring-test-common</module>
     </modules>
 
