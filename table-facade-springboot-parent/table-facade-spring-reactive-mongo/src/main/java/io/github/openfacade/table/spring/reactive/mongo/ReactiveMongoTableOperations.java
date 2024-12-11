@@ -16,7 +16,24 @@
 
 package io.github.openfacade.table.spring.reactive.mongo;
 
-import io.github.openfacade.table.reactive.api.ReactiveTableOperations;
+import io.github.openfacade.table.spring.core.ReactiveBaseTableOperations;
+import io.github.openfacade.table.spring.core.TableMetadata;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-public class ReactiveMongoTableOperations implements ReactiveTableOperations {
+public class ReactiveMongoTableOperations extends ReactiveBaseTableOperations {
+    @Override
+    public <T> Mono<T> insert(T object, TableMetadata metadata) {
+        return null;
+    }
+
+    @Override
+    public <T> Flux<T> findAll(Class<T> type, TableMetadata metadata) {
+        return null;
+    }
+
+    @Override
+    public <T> Mono<Long> deleteAll(Class<T> type, TableMetadata metadata) {
+        return null;
+    }
 }

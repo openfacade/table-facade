@@ -16,5 +16,10 @@
 
 package io.github.openfacade.table.spring.test.common;
 
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ComponentScan(basePackages = "io.github.openfacade.table.spring")
 public class TestConfig {
 }

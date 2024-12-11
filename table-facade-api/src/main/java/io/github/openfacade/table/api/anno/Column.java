@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.spring.reactive.mysql;
+package io.github.openfacade.table.api.anno;
 
-import io.github.openfacade.table.api.anno.Column;
-import io.github.openfacade.table.api.anno.Table;
-import lombok.Getter;
-import lombok.Setter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Setter
-@Getter
-@Table(name = "test_entity")
-public class TestMysqlEntity {
-    @Column(name = "id")
-    private Long id;
-
-    @Column(name = "blob_bytes_field")
-    private byte[] blobBytesField;
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Column {
+    String name();
 }

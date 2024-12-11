@@ -16,5 +16,13 @@
 
 package io.github.openfacade.table.reactive.api;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 public interface ReactiveTableOperations {
+    <T> Mono<T> insert(T object);
+
+    <T> Flux<T> findAll(Class<T> type);
+
+    <T> Mono<Long> deleteAll(Class<T> type);
 }

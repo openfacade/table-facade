@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package io.github.openfacade.table.spring.reactive.mysql;
+package io.github.openfacade.table.spring.core;
 
-import io.github.openfacade.table.api.anno.Column;
-import io.github.openfacade.table.api.anno.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
-@Setter
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+
 @Getter
-@Table(name = "test_entity")
-public class TestMysqlEntity {
-    @Column(name = "id")
-    private Long id;
+@AllArgsConstructor
+public class TableMetadata {
+    private final String tableName;
 
-    @Column(name = "blob_bytes_field")
-    private byte[] blobBytesField;
+    private final LinkedHashMap<String, Method> setterMap;
+
+    private final LinkedHashMap<String, Method> getterMap;
 }
