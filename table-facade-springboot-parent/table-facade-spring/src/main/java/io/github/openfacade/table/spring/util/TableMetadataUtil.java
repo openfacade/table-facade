@@ -52,7 +52,11 @@ public class TableMetadataUtil {
         if (type.isAnnotationPresent(Table.class)) {
             return type.getAnnotation(Table.class).name();
         } else if (type.isAnnotationPresent(org.springframework.data.relational.core.mapping.Table.class)) {
-            return type.getAnnotation(org.springframework.data.relational.core.mapping.Table.class).name();
+            org.springframework.data.relational.core.mapping.Table annotation = type.getAnnotation(org.springframework.data.relational.core.mapping.Table.class);
+            if (annotation.value().isEmpty()) {
+                return annotation.value();
+            }
+            return annotation.name();
         }
         return null;
     }
