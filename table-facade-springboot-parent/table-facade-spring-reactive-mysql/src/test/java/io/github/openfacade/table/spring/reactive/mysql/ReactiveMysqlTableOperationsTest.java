@@ -20,6 +20,7 @@ import io.github.openfacade.table.api.ComparisonCondition;
 import io.github.openfacade.table.api.ComparisonOperator;
 import io.github.openfacade.table.reactive.api.ReactiveTableOperations;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,9 @@ public class ReactiveMysqlTableOperationsTest {
         String createTableSql = """
                 CREATE TABLE IF NOT EXISTS test_entity (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                    blob_bytes_field BLOB
+                    tinyint_boolean_field TINYINT(1),
+                    blob_bytes_field BLOB,
+                    varchar_string_field VARCHAR(255)
                 );
                 """;
         databaseClient.sql(createTableSql).fetch()
@@ -59,11 +62,23 @@ public class ReactiveMysqlTableOperationsTest {
                 .block();
     }
 
+    @AfterAll
+    void afterAll() {
+        String dropTableSql = "DROP TABLE IF EXISTS test_entity;";
+        databaseClient.sql(dropTableSql).fetch()
+                .rowsUpdated()
+                .doOnSuccess(count -> log.info("table dropped successfully."))
+                .doOnError(error -> log.error("error dropping table", error))
+                .block();
+    }
+
     @Test
     void testInsertSuccess() {
         TestMysqlEntity entityToInsert = new TestMysqlEntity();
         entityToInsert.setId(2L);
+        entityToInsert.setTinyintBooleanField(true);
         entityToInsert.setBlobBytesField("Sample Data".getBytes(StandardCharsets.UTF_8));
+        entityToInsert.setVarcharStringField("Sample");
 
         reactiveTableOperations.insert(entityToInsert)
                 .doOnSuccess(insertedEntity -> log.info("Inserted entity: {}", insertedEntity))
@@ -81,7 +96,9 @@ public class ReactiveMysqlTableOperationsTest {
 
         TestMysqlEntity retrievedEntity = entities.get(0);
         Assertions.assertNotNull(retrievedEntity.getId(), "ID should not be null after insertion");
+        Assertions.assertTrue(retrievedEntity.isTinyintBooleanField());
         Assertions.assertArrayEquals("Sample Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertEquals("Sample", retrievedEntity.getVarcharStringField());
 
         reactiveTableOperations.deleteAll(TestMysqlEntity.class)
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
@@ -131,7 +148,9 @@ public class ReactiveMysqlTableOperationsTest {
     void testFindByComparisonCondition() {
         TestMysqlEntity entityToInsert = new TestMysqlEntity();
         entityToInsert.setId(2L);
+        entityToInsert.setTinyintBooleanField(true);
         entityToInsert.setBlobBytesField("Sample Data".getBytes(StandardCharsets.UTF_8));
+        entityToInsert.setVarcharStringField("Sample");
 
         reactiveTableOperations.insert(entityToInsert)
                 .doOnSuccess(insertedEntity -> log.info("Inserted entity: {}", insertedEntity))
@@ -143,12 +162,26 @@ public class ReactiveMysqlTableOperationsTest {
         Assertions.assertNotNull(retrievedEntity, "Retrieved entity should not be null");
         Assertions.assertEquals(2L, retrievedEntity.getId(), "Retrieved entity ID should match");
 
-        reactiveTableOperations.update(condition, new Object[]{"blob_bytes_field", "Updated Data".getBytes(StandardCharsets.UTF_8)}, TestMysqlEntity.class)
+        Object[] pairs = {
+                "tinyint_boolean_field",
+                false,
+                "blob_bytes_field",
+                "Updated Data".getBytes(StandardCharsets.UTF_8),
+                "varchar_string_field",
+                "Updated Data",
+        };
+        reactiveTableOperations.update(condition, pairs, TestMysqlEntity.class)
                 .doOnSuccess(updatedCount -> log.info("Updated {} entities", updatedCount))
                 .block();
 
-        TestMysqlEntity updatedEntity = reactiveTableOperations.find(condition, TestMysqlEntity.class).block();
-        Assertions.assertArrayEquals("Updated Data".getBytes(StandardCharsets.UTF_8), updatedEntity.getBlobBytesField(), "Blob data should match after update");
+        reactiveTableOperations.find(condition, TestMysqlEntity.class)
+                .as(StepVerifier::create)
+                .assertNext(entity -> {
+                    Assertions.assertFalse(entity.isTinyintBooleanField());
+                    Assertions.assertArrayEquals("Updated Data".getBytes(StandardCharsets.UTF_8), entity.getBlobBytesField(), "Blob data should match after update");
+                    Assertions.assertEquals("Updated Data", entity.getVarcharStringField());
+                })
+                .verifyComplete();
 
         reactiveTableOperations.delete(condition, TestMysqlEntity.class)
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))

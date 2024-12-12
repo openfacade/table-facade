@@ -79,13 +79,15 @@ public class TableMetadataUtil {
     }
 
     public static <T> Method getGetMethod(Class<T> tClass, Field classField) {
+        String fieldName = classField.getName();
+        String capFieldName = capitalizeFirstChar(fieldName);
         try {
             if (isTypeBoolean(classField.getType().getName())) {
-                return tClass.getMethod("is" + capitalizeFirstChar(classField.getName()), classField.getType());
+                return tClass.getMethod("is" + capFieldName);
             }
-            return tClass.getMethod("get" + capitalizeFirstChar(classField.getName()));
+            return tClass.getMethod("get" + capFieldName);
         } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("No get method", e);
+            throw new IllegalStateException(String.format("No get method for field %s", fieldName), e);
         }
     }
 

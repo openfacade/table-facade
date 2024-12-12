@@ -28,6 +28,12 @@ public class TestMysqlEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "tinyint_boolean_field")
+    private boolean tinyintBooleanField;
+
     @Column(name = "blob_bytes_field")
     private byte[] blobBytesField;
+
+    @Column(name = "varchar_string_field")
+    private String varcharStringField;
 }
