@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -86,11 +87,10 @@ public class ReactiveMysqlTableOperationsTest {
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
                 .block();
 
-        List<TestMysqlEntity> emptyResult = reactiveTableOperations.findAll(TestMysqlEntity.class)
-                .collectList()
-                .block();
-
-        Assertions.assertTrue(emptyResult.isEmpty(), "The table should be empty after deletion");
+        reactiveTableOperations.findAll(TestMysqlEntity.class)
+                .as(StepVerifier::create)
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     @Test
@@ -120,11 +120,10 @@ public class ReactiveMysqlTableOperationsTest {
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
                 .block();
 
-        List<TestMysqlEntity> emptyResult = reactiveTableOperations.findAll(TestMysqlEntity.class)
-                .collectList()
-                .block();
-
-        Assertions.assertTrue(emptyResult.isEmpty(), "The table should be empty after deletion");
+        reactiveTableOperations.findAll(TestMysqlEntity.class)
+                .as(StepVerifier::create)
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
 
@@ -155,10 +154,9 @@ public class ReactiveMysqlTableOperationsTest {
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
                 .block();
 
-        List<TestMysqlEntity> emptyResult = reactiveTableOperations.findAll(TestMysqlEntity.class)
-                .collectList()
-                .block();
-
-        Assertions.assertTrue(emptyResult.isEmpty(), "The table should be empty after deletion");
+        reactiveTableOperations.findAll(TestMysqlEntity.class)
+                .as(StepVerifier::create)
+                .expectNextCount(0)
+                .verifyComplete();
     }
 }

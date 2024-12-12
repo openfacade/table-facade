@@ -23,7 +23,6 @@ import io.github.openfacade.table.spring.core.TableMetadata;
 import io.github.openfacade.table.spring.util.TableMetadataUtil;
 import io.r2dbc.spi.Row;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,7 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
         classMap.putIfAbsent(type, TableMetadataUtil.parseClass(type));
         TableMetadata metadata = classMap.get(type);
 
-        String tableName = escapeIdentifier(metadata.getTableName());
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
 
         Map<String, Object> parameters = metadata.getGetterMap().entrySet().stream()
                 .map(entry -> {
@@ -65,7 +64,7 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
         }
 
         List<String> columns = parameters.keySet().stream().toList();
-        List<String> escapedColumns = columns.stream().map(this::escapeIdentifier).collect(Collectors.toList());
+        List<String> escapedColumns = columns.stream().map(identifier -> MysqlUtil.quoteIdentifier(identifier)).collect(Collectors.toList());
         String placeholders = columns.stream().map(col -> "?").collect(Collectors.joining(", "));
 
         if (pairs.length % 2 != 0) {
@@ -73,7 +72,7 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
         }
 
         String onDuplicateKeyUpdateClause = IntStream.range(0, pairs.length / 2)
-                .mapToObj(i -> escapeIdentifier((String) pairs[2 * i]) + " = ?")
+                .mapToObj(i -> MysqlUtil.quoteIdentifier((String) pairs[2 * i]) + " = ?")
                 .collect(Collectors.joining(", "));
 
         String query = String.format(
@@ -100,7 +99,7 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
     @Override
     public <T> Mono<T> insert(T object, TableMetadata metadata) {
-        String tableName = escapeIdentifier(metadata.getTableName());
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
 
         Map<String, Object> parameters = metadata.getGetterMap().entrySet().stream()
                 .map(entry -> {
@@ -119,7 +118,7 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
         List<String> columns = parameters.keySet().stream().toList();
 
-        List<String> escapedColumns = columns.stream().map(this::escapeIdentifier)
+        List<String> escapedColumns = columns.stream().map(identifier -> MysqlUtil.quoteIdentifier(identifier))
                 .collect(Collectors.toList());
 
         String placeholders = columns.stream()
@@ -137,13 +136,13 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
     @Override
     public <T> Mono<Long> update(Condition condition, Object[] pairs, Class<T> type, TableMetadata metadata) {
-        String tableName = escapeIdentifier(metadata.getTableName());
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
         if (pairs.length % 2 != 0) {
             throw new IllegalArgumentException("Pairs must be an even number.");
         }
 
         String setClause = IntStream.range(0, pairs.length / 2)
-                .mapToObj(i -> escapeIdentifier((String) pairs[2 * i]) + " = ?")
+                .mapToObj(i -> MysqlUtil.quoteIdentifier((String) pairs[2 * i]) + " = ?")
                 .collect(Collectors.joining(", "));
 
         String query = "UPDATE " + tableName + " SET " + setClause + " WHERE " + condition(condition);
@@ -158,9 +157,9 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
     @Override
     public <T> Mono<T> find(Condition condition, Class<T> type, TableMetadata metadata) {
-        String tableName = escapeIdentifier(metadata.getTableName());
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
         List<String> escapedColumns = metadata.getSetterMap().keySet().stream()
-                .map(this::escapeIdentifier)
+                .map(identifier -> MysqlUtil.quoteIdentifier(identifier))
                 .collect(Collectors.toList());
 
         String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName + " WHERE " + condition(condition);
@@ -172,9 +171,9 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
     @Override
     public <T> Flux<T> findAll(Class<T> type, TableMetadata metadata) {
-        String tableName = escapeIdentifier(metadata.getTableName());
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
         List<String> escapedColumns = metadata.getSetterMap().keySet().stream()
-                .map(this::escapeIdentifier)
+                .map(identifier -> MysqlUtil.quoteIdentifier(identifier))
                 .collect(Collectors.toList());
 
         String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName;
@@ -211,7 +210,7 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
     @Override
     public <T> Mono<Long> delete(Condition condition, Class<T> type, TableMetadata metadata) {
-        String tableName = escapeIdentifier(metadata.getTableName());
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
         String query = "DELETE FROM " + tableName + " WHERE " + condition(condition);
 
         return databaseClient.sql(query)
@@ -222,7 +221,7 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
     @Override
     public <T> Mono<Long> deleteAll(Class<T> type, TableMetadata metadata) {
-        String tableName = escapeIdentifier(metadata.getTableName());
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
         String query = "DELETE FROM " + tableName;
 
         return databaseClient.sql(query)
@@ -233,14 +232,10 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
 
     private String condition(Condition condition) {
         if (condition instanceof ComparisonCondition comparisonCondition) {
-            return escapeIdentifier(comparisonCondition.getColumn()) + " " + comparisonCondition.getOperator().symbol() + " " + escapeValue(comparisonCondition.getValue());
+            return MysqlUtil.quoteIdentifier(comparisonCondition.getColumn()) + " " + comparisonCondition.getOperator().symbol() + " " + escapeValue(comparisonCondition.getValue());
         } else {
             throw new IllegalArgumentException("Unsupported condition type: " + condition.getClass().getName());
         }
-    }
-
-    private String escapeIdentifier(@NotNull String identifier) {
-        return "`" + identifier + "`";
     }
 
     private String escapeValue(@Nullable Object value) {
