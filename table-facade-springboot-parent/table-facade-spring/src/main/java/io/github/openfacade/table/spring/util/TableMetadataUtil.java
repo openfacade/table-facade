@@ -53,7 +53,7 @@ public class TableMetadataUtil {
             return type.getAnnotation(Table.class).name();
         } else if (type.isAnnotationPresent(org.springframework.data.relational.core.mapping.Table.class)) {
             org.springframework.data.relational.core.mapping.Table annotation = type.getAnnotation(org.springframework.data.relational.core.mapping.Table.class);
-            if (annotation.value().isEmpty()) {
+            if (!annotation.value().isEmpty()) {
                 return annotation.value();
             }
             return annotation.name();
