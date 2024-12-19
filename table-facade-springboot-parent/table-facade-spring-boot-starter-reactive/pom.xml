@@ -29,8 +29,25 @@
     <dependencies>
         <dependency>
             <groupId>io.github.openfacade</groupId>
+            <artifactId>table-facade-reactive-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfacade</groupId>
             <artifactId>table-facade-spring</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfacade</groupId>
+            <artifactId>table-facade-spring-reactive-mysql</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfacade</groupId>
+            <artifactId>table-facade-spring-reactive-opengauss</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
