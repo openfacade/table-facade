@@ -64,7 +64,7 @@ public class ReactiveMysqlTableOperationsTest {
 
     @AfterAll
     void afterAll() {
-        String dropTableSql = "DROP TABLE IF EXISTS test_entity;";
+        String dropTableSql = "DROP TABLE test_entity;";
         databaseClient.sql(dropTableSql).fetch()
                 .rowsUpdated()
                 .doOnSuccess(count -> log.info("table dropped successfully."))

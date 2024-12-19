@@ -25,6 +25,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>table-facade-api</module>
+        <module>table-facade-jdbc-parent</module>
         <module>table-facade-reactive-api</module>
         <module>table-facade-springboot2-parent</module>
         <module>table-facade-springboot-parent</module>
@@ -40,6 +41,7 @@
         <!-- dependency -->
         <annotations.version>13.0</annotations.version>
         <junit.version>5.11.3</junit.version>
+        <hikari.version>4.0.3</hikari.version>
         <log4j.version>2.24.0</log4j.version>
         <lombok.version>1.18.36</lombok.version>
         <opengauss.version>5.1.0</opengauss.version>
@@ -110,7 +112,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
             <version>${log4j.version}</version>
             <scope>test</scope>
         </dependency>

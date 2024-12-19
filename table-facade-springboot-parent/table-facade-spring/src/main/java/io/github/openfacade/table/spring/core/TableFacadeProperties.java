@@ -20,10 +20,29 @@ import io.github.openfacade.table.api.DriverType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@Setter
 @Getter
+@Setter
 @ConfigurationProperties("spring.table.facade")
 public class TableFacadeProperties {
     private DriverType driverType;
+
+    @NestedConfigurationProperty
+    private OpenGauss openGauss;
+
+    @NestedConfigurationProperty
+    private Postgre postgre;
+
+    @Getter
+    @Setter
+    public static class OpenGauss {
+        private String schema;
+    }
+
+    @Getter
+    @Setter
+    public static class Postgre {
+        private String schema;
+    }
 }
