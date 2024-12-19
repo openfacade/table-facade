@@ -16,7 +16,12 @@
 
 package io.github.openfacade.table.spring.opengauss;
 
+import io.github.openfacade.table.api.TableException;
 import io.github.openfacade.table.api.TableOperations;
 
 public class OpengaussTableOperations implements TableOperations {
+    @Override
+    public <T> Long deleteAll(Class<T> type) throws TableException {
+        throw new UnsupportedOperationException();
+    }
 }

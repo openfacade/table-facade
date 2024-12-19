@@ -29,6 +29,7 @@
         <module>table-facade-reactive-api</module>
         <module>table-facade-springboot2-parent</module>
         <module>table-facade-springboot-parent</module>
+        <module>table-facade-sql-parent</module>
         <module>table-facade-test-common</module>
     </modules>
 

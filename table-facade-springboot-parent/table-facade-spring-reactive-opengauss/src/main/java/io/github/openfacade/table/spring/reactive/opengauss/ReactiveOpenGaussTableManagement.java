@@ -18,6 +18,7 @@ package io.github.openfacade.table.spring.reactive.opengauss;
 
 import io.github.openfacade.table.reactive.api.ReactiveTableManagement;
 import io.github.openfacade.table.spring.core.TableFacadeProperties;
+import io.github.openfacade.table.sql.mysql.MysqlSqlUtil;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -33,6 +34,6 @@ public class ReactiveOpenGaussTableManagement implements ReactiveTableManagement
 
     @Override
     public Mono<Void> dropTable(@NotNull String tableName) {
-        return databaseClient.sql("DROP TABLE " + OpenGaussUtil.quoteIdentifier(tableName)).fetch().rowsUpdated().then();
+        return databaseClient.sql(MysqlSqlUtil.dropTable(tableName)).fetch().rowsUpdated().then();
     }
 }

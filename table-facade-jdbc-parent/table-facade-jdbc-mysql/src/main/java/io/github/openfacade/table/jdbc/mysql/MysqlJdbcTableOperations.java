@@ -16,50 +16,36 @@
 
 package io.github.openfacade.table.jdbc.mysql;
 
-import io.github.openfacade.table.api.Table;
 import io.github.openfacade.table.api.TableException;
-import io.github.openfacade.table.api.TableManagement;
+import io.github.openfacade.table.api.TableOperations;
 import io.github.openfacade.table.sql.mysql.MysqlSqlUtil;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javax.sql.DataSource;
 
 @RequiredArgsConstructor
-public class MysqlJdbcTableManagement implements TableManagement {
+public class MysqlJdbcTableOperations implements TableOperations {
     private final DataSource dataSource;
 
     @Override
-    public List<Table> showTables() throws TableException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SHOW TABLES")) {
-            List<Table> tables = new ArrayList<>();
-            while (rs.next()) {
-                Table table = new Table();
-                table.setName(rs.getString(1));
-                tables.add(table);
-            }
-            return tables;
-        } catch (SQLException e) {
-            throw new TableException("show tables failed", e);
+    public <T> Long deleteAll(Class<T> type) throws TableException {
+        io.github.openfacade.table.api.anno.Table tableAnnotation = type.getAnnotation(io.github.openfacade.table.api.anno.Table.class);
+        if (tableAnnotation == null || tableAnnotation.name().isEmpty()) {
+            throw new TableException("Class " + type.getName() + " does not have a Table annotation with a valid name.");
         }
-    }
 
-    @Override
-    public void dropTable(@NotNull String tableName) throws TableException {
-        String sql = MysqlSqlUtil.dropTable(tableName);
+        String tableName = tableAnnotation.name();
+        String sql = MysqlSqlUtil.deleteAll(tableName);
+
         try (Connection connection = dataSource.getConnection();
              Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(sql);
+            int rowsAffected = stmt.executeUpdate(sql);
+            return (long) rowsAffected;
         } catch (SQLException e) {
-            throw new TableException("drop table failed " + tableName, e);
+            throw new TableException("Failed to delete all records from table " + tableName, e);
         }
     }
 }

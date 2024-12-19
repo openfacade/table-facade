@@ -17,4 +17,5 @@
 package io.github.openfacade.table.api;
 
 public interface TableOperations {
+    <T> Long deleteAll(Class<T> type) throws TableException;
 }

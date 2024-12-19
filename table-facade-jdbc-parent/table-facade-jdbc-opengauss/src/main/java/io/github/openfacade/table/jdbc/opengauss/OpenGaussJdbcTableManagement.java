@@ -20,6 +20,7 @@ import io.github.openfacade.table.api.OpenGaussConfig;
 import io.github.openfacade.table.api.Table;
 import io.github.openfacade.table.api.TableException;
 import io.github.openfacade.table.api.TableManagement;
+import io.github.openfacade.table.sql.mysql.MysqlSqlUtil;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,7 +57,7 @@ public class OpenGaussJdbcTableManagement implements TableManagement {
 
     @Override
     public void dropTable(@NotNull String tableName) throws TableException {
-        String sql = "DROP TABLE `" + tableName + '`';
+        String sql = MysqlSqlUtil.dropTable(tableName);
         try (Connection connection = dataSource.getConnection();
              Statement stmt = connection.createStatement()) {
             stmt.executeUpdate(sql);

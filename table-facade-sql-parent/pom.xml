@@ -20,29 +20,16 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.openfacade</groupId>
-        <artifactId>table-facade-jdbc-parent</artifactId>
+        <artifactId>table-facade-parent</artifactId>
         <version>0.0.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>table-facade-jdbc-mysql</artifactId>
+    <modules>
+        <module>table-facade-sql-common</module>
+        <module>table-facade-sql-mysql</module>
+    </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.github.openfacade</groupId>
-            <artifactId>table-facade-sql-mysql</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>${mysql.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <artifactId>table-facade-sql-parent</artifactId>
+    <packaging>pom</packaging>
 
 </project>

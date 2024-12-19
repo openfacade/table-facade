@@ -17,6 +17,7 @@
 package io.github.openfacade.table.spring.reactive.mysql;
 
 import io.github.openfacade.table.reactive.api.ReactiveTableManagement;
+import io.github.openfacade.table.sql.mysql.MysqlSqlUtil;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -30,6 +31,6 @@ public class ReactiveMysqlTableManagement implements ReactiveTableManagement {
 
     @Override
     public Mono<Void> dropTable(@NotNull String tableName) {
-        return databaseClient.sql("DROP TABLE " + MysqlUtil.quoteIdentifier(tableName)).fetch().rowsUpdated().then();
+        return databaseClient.sql(MysqlSqlUtil.dropTable(tableName)).fetch().rowsUpdated().then();
     }
 }

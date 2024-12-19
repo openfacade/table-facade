@@ -26,4 +26,12 @@
 
     <artifactId>table-facade-jdbc-opengauss</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.github.openfacade</groupId>
+            <artifactId>table-facade-sql-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
 </project>
