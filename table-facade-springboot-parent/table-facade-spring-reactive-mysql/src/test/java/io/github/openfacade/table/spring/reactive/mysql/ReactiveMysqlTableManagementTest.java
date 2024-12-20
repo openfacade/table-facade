@@ -34,6 +34,28 @@ public class ReactiveMysqlTableManagementTest {
     private ReactiveTableManagement tableManagement;
 
     @Test
+    public void testExistsTable() {
+        databaseClient.sql("CREATE TABLE IF NOT EXISTS testtable (id INT PRIMARY KEY)").fetch().rowsUpdated().block();
+
+        tableManagement.existsTable("testtable").as(StepVerifier::create)
+                .expectNext(true)
+                .verifyComplete();
+
+        tableManagement.dropTable("testtable").block();
+
+        tableManagement.existsTable("testtable").as(StepVerifier::create)
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
+    public void testExistsTableNotExist() {
+        tableManagement.existsTable("notexisttable").as(StepVerifier::create)
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
     public void testDropTableSuccess() {
         databaseClient.sql("CREATE TABLE IF NOT EXISTS testtable (id INT PRIMARY KEY)").fetch().rowsUpdated().block();
         tableManagement.dropTable("testtable").block();
