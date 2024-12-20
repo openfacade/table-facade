@@ -20,5 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 public interface ReactiveTableManagement {
+    Mono<Boolean> existsTable(@NotNull String tableName);
+
     Mono<Void> dropTable(@NotNull String tableName);
 }
