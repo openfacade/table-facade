@@ -33,6 +33,12 @@ public class ReactiveOpenGaussTableManagement implements ReactiveTableManagement
     private final DatabaseClient databaseClient;
 
     @Override
+    public Mono<Boolean> existsTable(@NotNull String tableName) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = ?)";
+        return databaseClient.sql(sql).bind(0, tableName).map(row -> row.get(0, Boolean.class)).one();
+    }
+
+    @Override
     public Mono<Void> dropTable(@NotNull String tableName) {
         return databaseClient.sql(MysqlSqlUtil.dropTable(tableName)).fetch().rowsUpdated().then();
     }
