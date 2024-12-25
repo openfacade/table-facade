@@ -24,4 +24,14 @@ public class MongoTableOperations implements TableOperations {
     public <T> Long deleteAll(Class<T> type) throws TableException {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Long deleteAll(String tableName) throws TableException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Long count(String tableName) throws TableException {
+        throw new UnsupportedOperationException();
+    }
 }

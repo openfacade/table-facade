@@ -32,8 +32,8 @@ import reactor.core.publisher.Mono;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -206,7 +206,7 @@ public class ReactiveOpenGaussTableOperations extends ReactiveBaseTableOperation
                 Object object = row.get(columnName, Object.class);
                 if ((object instanceof String str) && parameterType == byte[].class) {
                     try {
-                        setter.invoke(instance, str.getBytes(StandardCharsets.UTF_8));
+                        setter.invoke(instance, HexFormat.of().parseHex(str));
                     } catch (IllegalAccessException ex) {
                         throw new RuntimeException(ex);
                     } catch (InvocationTargetException ex) {

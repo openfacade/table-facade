@@ -22,6 +22,7 @@ import io.github.openfacade.table.sql.mysql.MysqlSqlUtil;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
@@ -46,6 +47,34 @@ public class OpenGaussJdbcTableOperations implements TableOperations {
             return (long) rowsAffected;
         } catch (SQLException e) {
             throw new TableException("Failed to delete all records from table " + tableName, e);
+        }
+    }
+
+    @Override
+    public Long deleteAll(String tableName) throws TableException {
+        String sql = MysqlSqlUtil.deleteAll(tableName);
+
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement()) {
+            int rowsAffected = stmt.executeUpdate(sql);
+            return (long) rowsAffected;
+        } catch (SQLException e) {
+            throw new TableException("Failed to delete all records from table " + tableName, e);
+        }
+    }
+
+    @Override
+    public Long count(String tableName) throws TableException {
+        String sql = MysqlSqlUtil.count(tableName);
+
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+            ResultSet resultSet = stmt.getResultSet();
+            resultSet.next();
+            return resultSet.getLong(1);
+        } catch (SQLException e) {
+            throw new TableException("Failed to count records in table " + tableName, e);
         }
     }
 }

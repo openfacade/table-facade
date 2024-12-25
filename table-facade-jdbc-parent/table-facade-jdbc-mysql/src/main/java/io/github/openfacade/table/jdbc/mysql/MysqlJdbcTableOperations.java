@@ -48,4 +48,14 @@ public class MysqlJdbcTableOperations implements TableOperations {
             throw new TableException("Failed to delete all records from table " + tableName, e);
         }
     }
+
+    @Override
+    public Long deleteAll(String tableName) throws TableException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Long count(String tableName) throws TableException {
+        throw new UnsupportedOperationException();
+    }
 }

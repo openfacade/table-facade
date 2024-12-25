@@ -42,4 +42,12 @@ public class MysqlSqlUtil {
                 .identifier(tableName);
         return sqlBuilder.build();
     }
+
+    public static String count(String tableName) {
+        SqlBuilder sqlBuilder = new SqlBuilder()
+                .keyword("SELECT COUNT(*) FROM")
+                .quote('`')
+                .identifier(tableName);
+        return sqlBuilder.build();
+    }
 }

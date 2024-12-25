@@ -18,4 +18,8 @@ package io.github.openfacade.table.api;
 
 public interface TableOperations {
     <T> Long deleteAll(Class<T> type) throws TableException;
+
+    Long deleteAll(String tableName) throws TableException;
+
+    Long count(String tableName) throws TableException;
 }
