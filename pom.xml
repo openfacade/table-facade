@@ -41,6 +41,7 @@
         <jacoco.overall.exec>${maven.multiModuleProjectDirectory}/target/jacoco/jacoco.exec</jacoco.overall.exec>
         <!-- dependency -->
         <annotations.version>13.0</annotations.version>
+        <docker-java.version>3.4.0</docker-java.version>
         <junit.version>5.11.3</junit.version>
         <hikari.version>4.0.3</hikari.version>
         <log4j.version>2.24.0</log4j.version>

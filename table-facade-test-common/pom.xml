@@ -26,4 +26,17 @@
 
     <artifactId>table-facade-test-common</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>${docker-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-api</artifactId>
+            <version>${docker-java.version}</version>
+        </dependency>
+    </dependencies>
+
 </project>

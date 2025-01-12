@@ -39,6 +39,12 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.opengauss</groupId>
+            <artifactId>opengauss-jdbc</artifactId>
+            <version>${opengauss.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
