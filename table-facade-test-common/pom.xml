@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java-api</artifactId>
+            <artifactId>docker-java-transport-httpclient5</artifactId>
             <version>${docker-java.version}</version>
         </dependency>
     </dependencies>

@@ -17,7 +17,6 @@
 package io.github.openfacade.table.spring.reactive.opengauss;
 
 import io.github.openfacade.table.reactive.api.ReactiveTableManagement;
-import io.github.openfacade.table.spring.core.TableFacadeProperties;
 import io.github.openfacade.table.sql.mysql.MysqlSqlUtil;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +27,6 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class ReactiveOpenGaussTableManagement implements ReactiveTableManagement {
-    private final TableFacadeProperties.OpenGauss openGauss;
 
     private final DatabaseClient databaseClient;
 

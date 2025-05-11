@@ -20,7 +20,6 @@ import io.github.openfacade.table.reactive.api.ReactiveTableManagement;
 import io.github.openfacade.table.test.common.container.OpenGaussContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -45,12 +44,6 @@ public class ReactiveOpenGaussTableManagementTest {
 
     @Autowired
     private ReactiveTableManagement tableManagement;
-
-    @BeforeAll
-    void startContainer() {
-        container = new OpenGaussContainer().withCompatibility("B");
-        container.startContainer();
-    }
 
     @AfterAll
     void stopContainer() {
