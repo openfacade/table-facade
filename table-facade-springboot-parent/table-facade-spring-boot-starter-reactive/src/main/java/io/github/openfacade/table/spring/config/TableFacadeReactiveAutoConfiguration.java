@@ -57,7 +57,7 @@ public class TableFacadeReactiveAutoConfiguration {
     @ConditionalOnMissingBean(ReactiveTableManagement.class)
     public ReactiveTableManagement reactiveTableManagement() {
         if (tableFacadeProperties.getDriverType().equals(DriverType.openGauss)) {
-            return new ReactiveOpenGaussTableManagement(tableFacadeProperties.getOpenGauss(), databaseClient);
+            return new ReactiveOpenGaussTableManagement(databaseClient);
         } else {
             return new ReactiveMysqlTableManagement(databaseClient);
         }

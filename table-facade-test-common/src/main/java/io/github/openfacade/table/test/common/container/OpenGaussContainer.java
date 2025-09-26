@@ -22,7 +22,11 @@ import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.PullResponseItem;
-import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
@@ -72,8 +76,12 @@ public class OpenGaussContainer {
     private final static String defaultPassword = "Test@123";
 
     public OpenGaussContainer() {
-        DockerClient dockerClient = DockerClientBuilder.getInstance().build();
-        dockerClient.infoCmd().exec();
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+        DockerHttpClient httpClient5 = new ApacheDockerHttpClient.Builder()
+                .dockerHost(config.getDockerHost())
+                .build();
+        DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient5);
+        dockerClient.pingCmd().exec();
         this.dockerClient = dockerClient;
         this.username = defaultUserName;
         this.password = defaultPassword;
