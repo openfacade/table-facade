@@ -18,18 +18,17 @@ package io.github.openfacade.table.api;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
-public class ComparisonCondition implements Condition {
-    private final String column;
+public class CompositeCondition implements Condition {
+    private final LogicalOperator operator;
+    private final List<Condition> conditions;
 
-    private final ComparisonOperator operator;
-
-    private final Object value;
-
-    public ComparisonCondition(String column, ComparisonOperator operator, Object value) {
-        this.column = column;
+    private CompositeCondition(LogicalOperator operator, List<Condition> conditions) {
         this.operator = operator;
-        this.value = value;
+        this.conditions = conditions;
     }
 
     public static Builder builder() {
@@ -37,33 +36,32 @@ public class ComparisonCondition implements Condition {
     }
 
     public static class Builder {
-        private String column;
-        private ComparisonOperator operator;
-        private Object value;
+        private LogicalOperator operator;
+        private List<Condition> conditions = new ArrayList<>();
 
-        public Builder column(String column) {
-            this.column = column;
-            return this;
-        }
-
-        public Builder operator(ComparisonOperator operator) {
+        public Builder operator(LogicalOperator operator) {
             this.operator = operator;
             return this;
         }
 
-        public Builder value(Object value) {
-            this.value = value;
+        public Builder condition(Condition condition) {
+            this.conditions.add(condition);
             return this;
         }
 
-        public ComparisonCondition build() {
-            if (column == null) {
-                throw new IllegalStateException("Column must be set");
-            }
+        public Builder conditions(List<Condition> conditions) {
+            this.conditions.addAll(conditions);
+            return this;
+        }
+
+        public CompositeCondition build() {
             if (operator == null) {
                 throw new IllegalStateException("Operator must be set");
             }
-            return new ComparisonCondition(column, operator, value);
+            if (conditions.isEmpty()) {
+                throw new IllegalStateException("At least one condition must be added");
+            }
+            return new CompositeCondition(operator, conditions);
         }
     }
 }
