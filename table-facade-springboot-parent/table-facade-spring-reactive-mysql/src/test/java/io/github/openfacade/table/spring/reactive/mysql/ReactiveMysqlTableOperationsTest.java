@@ -18,6 +18,8 @@ package io.github.openfacade.table.spring.reactive.mysql;
 
 import io.github.openfacade.table.api.ComparisonCondition;
 import io.github.openfacade.table.api.ComparisonOperator;
+import io.github.openfacade.table.api.CompositeCondition;
+import io.github.openfacade.table.api.LogicalOperator;
 import io.github.openfacade.table.reactive.api.ReactiveTableOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
@@ -184,6 +186,145 @@ public class ReactiveMysqlTableOperationsTest {
                 .verifyComplete();
 
         reactiveTableOperations.delete(condition, TestMysqlEntity.class)
+                .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
+                .block();
+
+        reactiveTableOperations.findAll(TestMysqlEntity.class)
+                .as(StepVerifier::create)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void testFindByCompositeCondition() {
+        TestMysqlEntity entityToInsert = new TestMysqlEntity();
+        entityToInsert.setId(3L);
+        entityToInsert.setTinyintBooleanField(false);
+        entityToInsert.setBlobBytesField("Composite Test Data".getBytes(StandardCharsets.UTF_8));
+        entityToInsert.setVarcharStringField("CompositeTest");
+
+        reactiveTableOperations.insert(entityToInsert)
+                .doOnSuccess(insertedEntity -> log.info("Inserted entity: {}", insertedEntity))
+                .block();
+
+        // Create a composite condition: id = 3 AND varchar_string_field = "CompositeTest"
+        ComparisonCondition idCondition = new ComparisonCondition("id", ComparisonOperator.EQ, 3L);
+        ComparisonCondition varcharCondition = new ComparisonCondition("varchar_string_field", ComparisonOperator.EQ, "CompositeTest");
+
+        CompositeCondition compositeCondition = CompositeCondition.builder()
+                .operator(LogicalOperator.AND)
+                .condition(idCondition)
+                .condition(varcharCondition)
+                .build();
+
+        TestMysqlEntity retrievedEntity = reactiveTableOperations.find(compositeCondition, TestMysqlEntity.class).block();
+
+        Assertions.assertNotNull(retrievedEntity, "Retrieved entity should not be null");
+        Assertions.assertEquals(3L, retrievedEntity.getId(), "Retrieved entity ID should match");
+        Assertions.assertFalse(retrievedEntity.isTinyintBooleanField());
+        Assertions.assertArrayEquals("Composite Test Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertEquals("CompositeTest", retrievedEntity.getVarcharStringField());
+
+        // Test with OR condition: id = 3 OR varchar_string_field = "NonExistent"
+        CompositeCondition orCondition = CompositeCondition.builder()
+                .operator(LogicalOperator.OR)
+                .condition(idCondition)
+                .condition(new ComparisonCondition("varchar_string_field", ComparisonOperator.EQ, "NonExistent"))
+                .build();
+
+        TestMysqlEntity orRetrievedEntity = reactiveTableOperations.find(orCondition, TestMysqlEntity.class).block();
+
+        Assertions.assertNotNull(orRetrievedEntity, "Retrieved entity should not be null for OR condition");
+        Assertions.assertEquals(3L, orRetrievedEntity.getId(), "Retrieved entity ID should match for OR condition");
+
+        reactiveTableOperations.delete(compositeCondition, TestMysqlEntity.class)
+                .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
+                .block();
+
+        reactiveTableOperations.findAll(TestMysqlEntity.class)
+                .as(StepVerifier::create)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void testFindByComplexCompositeCondition() {
+        // Insert test data
+        TestMysqlEntity entity1 = new TestMysqlEntity();
+        entity1.setId(4L);
+        entity1.setTinyintBooleanField(true);
+        entity1.setBlobBytesField("Complex Test Data 1".getBytes(StandardCharsets.UTF_8));
+        entity1.setVarcharStringField("ComplexTest1");
+
+        TestMysqlEntity entity2 = new TestMysqlEntity();
+        entity2.setId(5L);
+        entity2.setTinyintBooleanField(false);
+        entity2.setBlobBytesField("Complex Test Data 2".getBytes(StandardCharsets.UTF_8));
+        entity2.setVarcharStringField("ComplexTest2");
+
+        reactiveTableOperations.insert(entity1)
+                .doOnSuccess(insertedEntity -> log.info("Inserted entity1: {}", insertedEntity))
+                .block();
+
+        reactiveTableOperations.insert(entity2)
+                .doOnSuccess(insertedEntity -> log.info("Inserted entity2: {}", insertedEntity))
+                .block();
+
+        // Create a complex composite condition: (id = 4 AND varchar_string_field = "ComplexTest1") OR (id = 5 AND tinyint_boolean_field = true)
+        // This should return entity1 because the first part of OR condition matches
+        ComparisonCondition idCondition1 = new ComparisonCondition("id", ComparisonOperator.EQ, 4L);
+        ComparisonCondition varcharCondition1 = new ComparisonCondition("varchar_string_field", ComparisonOperator.EQ, "ComplexTest1");
+        CompositeCondition andCondition1 = CompositeCondition.builder()
+                .operator(LogicalOperator.AND)
+                .condition(idCondition1)
+                .condition(varcharCondition1)
+                .build();
+
+        ComparisonCondition idCondition2 = new ComparisonCondition("id", ComparisonOperator.EQ, 5L);
+        ComparisonCondition booleanCondition = new ComparisonCondition("tinyint_boolean_field", ComparisonOperator.EQ, true);
+        CompositeCondition andCondition2 = CompositeCondition.builder()
+                .operator(LogicalOperator.AND)
+                .condition(idCondition2)
+                .condition(booleanCondition)
+                .build();
+
+        CompositeCondition complexCondition = CompositeCondition.builder()
+                .operator(LogicalOperator.OR)
+                .condition(andCondition1)
+                .condition(andCondition2)
+                .build();
+
+        TestMysqlEntity retrievedEntity = reactiveTableOperations.find(complexCondition, TestMysqlEntity.class).block();
+
+        // Should find entity1 because (id = 4 AND varchar_string_field = "ComplexTest1") is true
+        Assertions.assertNotNull(retrievedEntity, "Retrieved entity should not be null");
+        Assertions.assertEquals(4L, retrievedEntity.getId(), "Retrieved entity ID should match");
+        Assertions.assertTrue(retrievedEntity.isTinyintBooleanField());
+        Assertions.assertArrayEquals("Complex Test Data 1".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertEquals("ComplexTest1", retrievedEntity.getVarcharStringField());
+
+        // Create another complex composite condition: (id = 4 AND tinyint_boolean_field = false) OR (id = 5 AND tinyint_boolean_field = true)
+        // This should return null because neither part of OR condition is fully satisfied
+        ComparisonCondition booleanConditionFalse = new ComparisonCondition("tinyint_boolean_field", ComparisonOperator.EQ, false);
+        CompositeCondition andCondition1False = CompositeCondition.builder()
+                .operator(LogicalOperator.AND)
+                .condition(idCondition1)
+                .condition(booleanConditionFalse)
+                .build();
+
+        CompositeCondition complexConditionNoResult = CompositeCondition.builder()
+                .operator(LogicalOperator.OR)
+                .condition(andCondition1False)
+                .condition(andCondition2)
+                .build();
+
+        TestMysqlEntity noResultEntity = reactiveTableOperations.find(complexConditionNoResult, TestMysqlEntity.class).block();
+
+        // Should not find any entity because neither (id = 4 AND tinyint_boolean_field = false) nor (id = 5 AND tinyint_boolean_field = true) is fully satisfied
+        Assertions.assertNull(noResultEntity, "Should not find any entity for this condition");
+
+        // Clean up test data
+        reactiveTableOperations.deleteAll(TestMysqlEntity.class)
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
                 .block();
 

@@ -17,7 +17,9 @@
 package io.github.openfacade.table.spring.reactive.opengauss;
 
 import io.github.openfacade.table.api.ComparisonCondition;
+import io.github.openfacade.table.api.CompositeCondition;
 import io.github.openfacade.table.api.Condition;
+import io.github.openfacade.table.api.LogicalOperator;
 import io.github.openfacade.table.spring.core.ReactiveBaseTableOperations;
 import io.github.openfacade.table.spring.core.TableMetadata;
 import io.github.openfacade.table.spring.util.TableMetadataUtil;
@@ -148,7 +150,10 @@ public class ReactiveOpenGaussTableOperations extends ReactiveBaseTableOperation
                 .mapToObj(i -> escapeIdentifier((String) pairs[2 * i]) + " = ?")
                 .collect(Collectors.joining(", "));
 
-        String query = "UPDATE " + tableName + " SET " + setClause + " WHERE " + condition(condition);
+        StringBuilder conditionBuilder = new StringBuilder();
+        condition(condition, conditionBuilder);
+
+        String query = "UPDATE " + tableName + " SET " + setClause + " WHERE " + conditionBuilder;
 
         DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(query);
         for (int i = 1; i < pairs.length; i += 2) {
@@ -165,7 +170,10 @@ public class ReactiveOpenGaussTableOperations extends ReactiveBaseTableOperation
                 .map(this::escapeIdentifier)
                 .collect(Collectors.toList());
 
-        String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName + " WHERE " + condition(condition);
+        StringBuilder conditionBuilder = new StringBuilder();
+        condition(condition, conditionBuilder);
+
+        String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName + " WHERE " + conditionBuilder;
 
         return databaseClient.sql(query)
                 .map((row, metadataAccessor) -> mapRowToEntity(row, type, metadata))
@@ -226,7 +234,11 @@ public class ReactiveOpenGaussTableOperations extends ReactiveBaseTableOperation
     @Override
     public <T> Mono<Long> delete(Condition condition, Class<T> type, TableMetadata metadata) {
         String tableName = escapeIdentifier(metadata.getTableName());
-        String query = "DELETE FROM " + tableName + " WHERE " + condition(condition);
+
+        StringBuilder conditionBuilder = new StringBuilder();
+        condition(condition, conditionBuilder);
+
+        String query = "DELETE FROM " + tableName + " WHERE " + conditionBuilder.toString();
 
         return databaseClient.sql(query)
                 .fetch()
@@ -245,9 +257,25 @@ public class ReactiveOpenGaussTableOperations extends ReactiveBaseTableOperation
                 .map(Long::valueOf);
     }
 
-    private String condition(Condition condition) {
+    private void condition(Condition condition, StringBuilder sqlBuilder) {
         if (condition instanceof ComparisonCondition comparisonCondition) {
-            return escapeIdentifier(comparisonCondition.getColumn()) + " " + comparisonCondition.getOperator().symbol() + " " + escapeValue(comparisonCondition.getValue());
+            sqlBuilder.append(escapeIdentifier(comparisonCondition.getColumn()))
+                    .append(" ")
+                    .append(comparisonCondition.getOperator().symbol())
+                    .append(" ")
+                    .append(escapeValue(comparisonCondition.getValue()));
+        } else if (condition instanceof CompositeCondition compositeCondition) {
+            List<Condition> conditions = compositeCondition.getConditions();
+            LogicalOperator operator = compositeCondition.getOperator();
+
+            sqlBuilder.append("(");
+            for (int i = 0; i < conditions.size(); i++) {
+                if (i > 0) {
+                    sqlBuilder.append(" ").append(operator.name()).append(" ");
+                }
+                condition(conditions.get(i), sqlBuilder);
+            }
+            sqlBuilder.append(")");
         } else {
             throw new IllegalArgumentException("Unsupported condition type: " + condition.getClass().getName());
         }
