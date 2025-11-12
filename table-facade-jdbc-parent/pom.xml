@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.github.openfacade</groupId>
         <artifactId>table-facade-parent</artifactId>
-        <version>0.0.5-SNAPSHOT</version>
+        <version>0.0.5</version>
     </parent>
 
     <modules>
@@ -29,6 +29,7 @@
         <module>table-facade-jdbc-mysql</module>
     </modules>
 
+    <name>Table Facade JDBC Parent</name>
     <artifactId>table-facade-jdbc-parent</artifactId>
     <packaging>pom</packaging>
 

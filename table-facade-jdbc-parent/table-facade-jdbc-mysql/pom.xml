@@ -21,9 +21,10 @@
     <parent>
         <groupId>io.github.openfacade</groupId>
         <artifactId>table-facade-jdbc-parent</artifactId>
-        <version>0.0.5-SNAPSHOT</version>
+        <version>0.0.5</version>
     </parent>
 
+    <name>Table Facade JDBC MySQL</name>
     <artifactId>table-facade-jdbc-mysql</artifactId>
 
     <dependencies>

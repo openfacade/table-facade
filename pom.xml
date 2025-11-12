@@ -21,7 +21,7 @@
 
     <groupId>io.github.openfacade</groupId>
     <artifactId>table-facade-parent</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5</version>
     <packaging>pom</packaging>
     <modules>
         <module>table-facade-api</module>

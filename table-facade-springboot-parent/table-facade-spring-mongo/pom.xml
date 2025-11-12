@@ -21,9 +21,10 @@
     <parent>
         <groupId>io.github.openfacade</groupId>
         <artifactId>table-facade-springboot-parent</artifactId>
-        <version>0.0.5-SNAPSHOT</version>
+        <version>0.0.5</version>
     </parent>
 
+    <name>Table Facade Spring Mongo</name>
     <artifactId>table-facade-spring-mongo</artifactId>
 
 </project>

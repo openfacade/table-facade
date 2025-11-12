@@ -21,9 +21,10 @@
     <parent>
         <groupId>io.github.openfacade</groupId>
         <artifactId>table-facade-sql-parent</artifactId>
-        <version>0.0.5-SNAPSHOT</version>
+        <version>0.0.5</version>
     </parent>
 
+    <name>Table Facade SQL Common</name>
     <artifactId>table-facade-sql-common</artifactId>
 
 </project>
