@@ -44,6 +44,11 @@ public class ReactiveMongoTableOperations extends ReactiveBaseTableOperations {
     }
 
     @Override
+    public <T> Flux<T> findAll(Condition condition, Class<T> type, TableMetadata metadata) {
+        return null;
+    }
+
+    @Override
     public <T> Mono<Long> delete(Condition condition, Class<T> type, TableMetadata metadata) {
         return null;
     }

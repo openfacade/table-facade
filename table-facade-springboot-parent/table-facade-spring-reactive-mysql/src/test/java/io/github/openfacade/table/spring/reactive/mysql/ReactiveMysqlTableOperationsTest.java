@@ -99,7 +99,8 @@ public class ReactiveMysqlTableOperationsTest {
         TestMysqlEntity retrievedEntity = entities.get(0);
         Assertions.assertNotNull(retrievedEntity.getId(), "ID should not be null after insertion");
         Assertions.assertTrue(retrievedEntity.isTinyintBooleanField());
-        Assertions.assertArrayEquals("Sample Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertArrayEquals("Sample Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data " +
+                "should match");
         Assertions.assertEquals("Sample", retrievedEntity.getVarcharStringField());
 
         reactiveTableOperations.deleteAll(TestMysqlEntity.class)
@@ -133,7 +134,8 @@ public class ReactiveMysqlTableOperationsTest {
 
         TestMysqlEntity retrievedEntity = entities.get(0);
         Assertions.assertNotNull(retrievedEntity.getId(), "ID should not be null after insertion");
-        Assertions.assertArrayEquals("Sample Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertArrayEquals("Sample Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data " +
+                "should match");
 
         reactiveTableOperations.deleteAll(TestMysqlEntity.class)
                 .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
@@ -180,7 +182,8 @@ public class ReactiveMysqlTableOperationsTest {
                 .as(StepVerifier::create)
                 .assertNext(entity -> {
                     Assertions.assertFalse(entity.isTinyintBooleanField());
-                    Assertions.assertArrayEquals("Updated Data".getBytes(StandardCharsets.UTF_8), entity.getBlobBytesField(), "Blob data should match after update");
+                    Assertions.assertArrayEquals("Updated Data".getBytes(StandardCharsets.UTF_8), entity.getBlobBytesField(), "Blob data " +
+                            "should match after update");
                     Assertions.assertEquals("Updated Data", entity.getVarcharStringField());
                 })
                 .verifyComplete();
@@ -222,7 +225,8 @@ public class ReactiveMysqlTableOperationsTest {
         Assertions.assertNotNull(retrievedEntity, "Retrieved entity should not be null");
         Assertions.assertEquals(3L, retrievedEntity.getId(), "Retrieved entity ID should match");
         Assertions.assertFalse(retrievedEntity.isTinyintBooleanField());
-        Assertions.assertArrayEquals("Composite Test Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertArrayEquals("Composite Test Data".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob " +
+                "data should match");
         Assertions.assertEquals("CompositeTest", retrievedEntity.getVarcharStringField());
 
         // Test with OR condition: id = 3 OR varchar_string_field = "NonExistent"
@@ -270,7 +274,8 @@ public class ReactiveMysqlTableOperationsTest {
                 .doOnSuccess(insertedEntity -> log.info("Inserted entity2: {}", insertedEntity))
                 .block();
 
-        // Create a complex composite condition: (id = 4 AND varchar_string_field = "ComplexTest1") OR (id = 5 AND tinyint_boolean_field = true)
+        // Create a complex composite condition: (id = 4 AND varchar_string_field = "ComplexTest1") OR (id = 5 AND tinyint_boolean_field
+        // = true)
         // This should return entity1 because the first part of OR condition matches
         ComparisonCondition idCondition1 = new ComparisonCondition("id", ComparisonOperator.EQ, 4L);
         ComparisonCondition varcharCondition1 = new ComparisonCondition("varchar_string_field", ComparisonOperator.EQ, "ComplexTest1");
@@ -300,10 +305,12 @@ public class ReactiveMysqlTableOperationsTest {
         Assertions.assertNotNull(retrievedEntity, "Retrieved entity should not be null");
         Assertions.assertEquals(4L, retrievedEntity.getId(), "Retrieved entity ID should match");
         Assertions.assertTrue(retrievedEntity.isTinyintBooleanField());
-        Assertions.assertArrayEquals("Complex Test Data 1".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob data should match");
+        Assertions.assertArrayEquals("Complex Test Data 1".getBytes(StandardCharsets.UTF_8), retrievedEntity.getBlobBytesField(), "Blob " +
+                "data should match");
         Assertions.assertEquals("ComplexTest1", retrievedEntity.getVarcharStringField());
 
-        // Create another complex composite condition: (id = 4 AND tinyint_boolean_field = false) OR (id = 5 AND tinyint_boolean_field = true)
+        // Create another complex composite condition: (id = 4 AND tinyint_boolean_field = false) OR (id = 5 AND tinyint_boolean_field =
+        // true)
         // This should return null because neither part of OR condition is fully satisfied
         ComparisonCondition booleanConditionFalse = new ComparisonCondition("tinyint_boolean_field", ComparisonOperator.EQ, false);
         CompositeCondition andCondition1False = CompositeCondition.builder()
@@ -320,7 +327,8 @@ public class ReactiveMysqlTableOperationsTest {
 
         TestMysqlEntity noResultEntity = reactiveTableOperations.find(complexConditionNoResult, TestMysqlEntity.class).block();
 
-        // Should not find any entity because neither (id = 4 AND tinyint_boolean_field = false) nor (id = 5 AND tinyint_boolean_field = true) is fully satisfied
+        // Should not find any entity because neither (id = 4 AND tinyint_boolean_field = false) nor (id = 5 AND tinyint_boolean_field =
+        // true) is fully satisfied
         Assertions.assertNull(noResultEntity, "Should not find any entity for this condition");
 
         // Clean up test data
@@ -332,5 +340,48 @@ public class ReactiveMysqlTableOperationsTest {
                 .as(StepVerifier::create)
                 .expectNextCount(0)
                 .verifyComplete();
+    }
+
+    @Test
+    void testFindAllSuccess() {
+        // insert 3 records for testing
+        for (int idx = 0; idx < 3; idx++) {
+            long id = idx + 5;
+            TestMysqlEntity entityToInsert = new TestMysqlEntity();
+            entityToInsert.setId(id);
+            entityToInsert.setTinyintBooleanField(true);
+            entityToInsert.setBlobBytesField("Sample Data".getBytes(StandardCharsets.UTF_8));
+            String str = id % 2 == 0 ? "Even" : "Odd";
+            entityToInsert.setVarcharStringField(str);
+
+            reactiveTableOperations.insert(entityToInsert)
+                    .doOnSuccess(insertedEntity -> log.info("Inserted entity: {}", insertedEntity))
+                    .block();
+        }
+
+        // query condition
+        ComparisonCondition idCondition = new ComparisonCondition("id", ComparisonOperator.GTE, 5L);
+        ComparisonCondition varcharCondition = new ComparisonCondition("varchar_string_field", ComparisonOperator.EQ, "Odd");
+        CompositeCondition andCondition = CompositeCondition.builder()
+                .operator(LogicalOperator.AND)
+                .condition(idCondition)
+                .condition(varcharCondition)
+                .build();
+
+        Flux<TestMysqlEntity> findAllResult = reactiveTableOperations.findAll(andCondition, TestMysqlEntity.class);
+
+        List<TestMysqlEntity> entities = findAllResult
+                .doOnNext(entity -> log.info("Retrieved entity: {}", entity))
+                .collectList()
+                .block();
+
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(2, entities.size());
+        Assertions.assertEquals("Odd", entities.get(0).getVarcharStringField());
+        Assertions.assertEquals("Odd", entities.get(1).getVarcharStringField());
+
+        reactiveTableOperations.deleteAll(TestMysqlEntity.class)
+                .doOnSuccess(deletedCount -> log.info("Deleted {} entities", deletedCount))
+                .block();
     }
 }
