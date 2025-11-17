@@ -29,6 +29,8 @@ public interface ReactiveTableOperations {
 
     <T> Flux<T> findAll(Class<T> type);
 
+    <T> Flux<T> findAll(Condition condition, Class<T> type);
+
     <T> Mono<Long> delete(Condition condition, Class<T> type);
 
     <T> Mono<Long> deleteAll(Class<T> type);

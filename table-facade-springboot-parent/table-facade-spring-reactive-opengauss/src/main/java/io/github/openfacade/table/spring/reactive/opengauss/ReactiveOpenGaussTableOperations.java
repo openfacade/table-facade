@@ -194,6 +194,23 @@ public class ReactiveOpenGaussTableOperations extends ReactiveBaseTableOperation
                 .all();
     }
 
+    @Override
+    public <T> Flux<T> findAll(Condition condition, Class<T> type, TableMetadata metadata) {
+        String tableName = escapeIdentifier(metadata.getTableName());
+        List<String> escapedColumns = metadata.getSetterMap().keySet().stream()
+                .map(this::escapeIdentifier)
+                .collect(Collectors.toList());
+
+        StringBuilder conditionBuilder = new StringBuilder();
+        condition(condition, conditionBuilder);
+
+        String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName + " WHERE " + conditionBuilder;
+
+        return databaseClient.sql(query)
+                .map((row, metadataAccessor) -> mapRowToEntity(row, type, metadata))
+                .all();
+    }
+
     private <T> T mapRowToEntity(Row row, Class<T> type, TableMetadata metadata) {
         T instance;
         try {

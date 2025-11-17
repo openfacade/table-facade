@@ -58,6 +58,13 @@ public abstract class ReactiveBaseTableOperations implements ReactiveTableOperat
     }
 
     @Override
+    public <T> Flux<T> findAll(Condition condition, Class<T> type) {
+        classMap.putIfAbsent(type, TableMetadataUtil.parseClass(type));
+        TableMetadata metadata = classMap.get(type);
+        return findAll(condition, type, metadata);
+    }
+
+    @Override
     public <T> Mono<Long> delete(Condition condition, Class<T> type) {
         classMap.putIfAbsent(type, TableMetadataUtil.parseClass(type));
         TableMetadata metadata = classMap.get(type);
@@ -78,6 +85,8 @@ public abstract class ReactiveBaseTableOperations implements ReactiveTableOperat
     public abstract <T> Mono<T> find(Condition condition, Class<T> type, TableMetadata metadata);
 
     public abstract <T> Flux<T> findAll(Class<T> type, TableMetadata metadata);
+
+    public abstract <T> Flux<T> findAll(Condition condition, Class<T> type, TableMetadata metadata);
 
     public abstract <T> Mono<Long> delete(Condition condition, Class<T> type, TableMetadata metadata);
 

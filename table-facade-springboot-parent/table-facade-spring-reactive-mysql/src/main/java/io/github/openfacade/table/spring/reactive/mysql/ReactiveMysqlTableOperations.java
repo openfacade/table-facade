@@ -66,7 +66,8 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
         }
 
         List<String> columns = parameters.keySet().stream().toList();
-        List<String> escapedColumns = columns.stream().map(identifier -> MysqlUtil.quoteIdentifier(identifier)).collect(Collectors.toList());
+        List<String> escapedColumns =
+                columns.stream().map(identifier -> MysqlUtil.quoteIdentifier(identifier)).collect(Collectors.toList());
         String placeholders = columns.stream().map(col -> "?").collect(Collectors.joining(", "));
 
         if (pairs.length % 2 != 0) {
@@ -185,6 +186,23 @@ public class ReactiveMysqlTableOperations extends ReactiveBaseTableOperations {
                 .collect(Collectors.toList());
 
         String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName;
+
+        return databaseClient.sql(query)
+                .map((row, metadataAccessor) -> mapRowToEntity(row, type, metadata))
+                .all();
+    }
+
+    @Override
+    public <T> Flux<T> findAll(Condition condition, Class<T> type, TableMetadata metadata) {
+        String tableName = MysqlUtil.quoteIdentifier(metadata.getTableName());
+        List<String> escapedColumns = metadata.getSetterMap().keySet().stream()
+                .map(MysqlUtil::quoteIdentifier)
+                .collect(Collectors.toList());
+
+        StringBuilder conditionBuilder = new StringBuilder();
+        condition(condition, conditionBuilder);
+
+        String query = "SELECT " + String.join(", ", escapedColumns) + " FROM " + tableName + " WHERE " + conditionBuilder;
 
         return databaseClient.sql(query)
                 .map((row, metadataAccessor) -> mapRowToEntity(row, type, metadata))

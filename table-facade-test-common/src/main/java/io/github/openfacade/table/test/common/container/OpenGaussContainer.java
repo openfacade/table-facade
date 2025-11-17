@@ -131,7 +131,7 @@ public class OpenGaussContainer {
                 .withEnv(envs).exec();
         this.response = Optional.of(containerResponse);
         dockerClient.startContainerCmd(containerResponse.getId()).exec();
-        TimeUnit.MINUTES.sleep(1);
+        TimeUnit.MINUTES.sleep(2);
     }
 
     public void stopContainer() {
