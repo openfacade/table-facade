@@ -19,9 +19,11 @@ package io.github.openfacade.table.test.common.container;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.model.Capability;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.PullResponseItem;
+import com.github.dockerjava.api.model.Ulimit;
 import com.github.dockerjava.core.DockerClientBuilder;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -121,12 +123,15 @@ public class OpenGaussContainer {
                 super.onNext(item);
             }
         }).awaitCompletion();
+        Ulimit[] ulimit = {new Ulimit("nofile", 1000000L, 1000000L)};
         CreateContainerResponse containerResponse = dockerClient.createContainerCmd(imageName)
                 .withName(containerName)
                 .withExposedPorts(tcp5432)
                 .withHostConfig(newHostConfig()
                         .withPortBindings()
                         .withPortBindings(portBindings)
+                        .withUlimits(ulimit)
+                        .withCapAdd(Capability.ALL)
                         .withPrivileged(true))
                 .withEnv(envs).exec();
         this.response = Optional.of(containerResponse);
